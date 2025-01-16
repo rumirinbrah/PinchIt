@@ -46,9 +46,6 @@ fun ImageCompPage(
         }
     }
 
-
-
-
     Column(
         Modifier
             .fillMaxSize()

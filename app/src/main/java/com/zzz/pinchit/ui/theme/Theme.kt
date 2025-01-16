@@ -22,7 +22,8 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40 ,
+    primary = lightPrimary ,
+    error= lightError,
     secondary = PurpleGrey40 ,
     tertiary = Pink40,
     background = lightBackground,
