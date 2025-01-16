@@ -44,7 +44,6 @@ fun ImageCompPage(
             currentImage = it
             onAction(CompImageAction.OnImageSelect)
         }
-
     }
 
 
