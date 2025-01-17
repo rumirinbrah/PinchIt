@@ -28,6 +28,7 @@ import com.zzz.pinchit.feature_compress.CompressImageEvents
 import com.zzz.pinchit.feature_compress.presentation.CompImageAction
 import com.zzz.pinchit.feature_compress.presentation.CompressorViewModel
 import com.zzz.pinchit.feature_compress.presentation.image_comp.ImageCompPage
+import com.zzz.pinchit.feature_compress.presentation.pdf_comp.PDFCompPage
 
 @Composable
 fun Navigation(
@@ -77,7 +78,7 @@ fun Navigation(
                 composable<Screen.HomeScreen> {
                     HomePage(
                         onFeatureClick = {
-                            navController.navigate(Screen.ImageCompScreen)
+                            navController.navigate(it)
                         }
                     )
                 }
@@ -94,7 +95,7 @@ fun Navigation(
                     )
                 }
                 composable<Screen.PDFCompScreen> {
-
+                    PDFCompPage()
                 }
             }
         }

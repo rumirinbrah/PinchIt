@@ -70,6 +70,11 @@ fun ImageCompPage(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+                VerticalSpace()
+                Text(
+                    "(Note that PNGs will not be compressed)" ,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
             CompressPhase.IMAGE_SELECTED -> {

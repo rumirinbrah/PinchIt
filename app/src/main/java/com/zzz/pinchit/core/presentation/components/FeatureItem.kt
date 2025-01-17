@@ -18,7 +18,7 @@ val items = listOf(
         icon = R.drawable.jpg_icon
     ),
     FeatureItem(
-        route = Screen.ImageCompScreen ,
+        route = Screen.PDFCompScreen ,
         title = "Compress PDFs" ,
         body = "Reduce PDF size without compromising much quality" ,
         icon = R.drawable.pdf_icon
