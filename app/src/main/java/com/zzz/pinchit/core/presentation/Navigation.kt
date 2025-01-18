@@ -4,6 +4,7 @@ import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,8 +34,10 @@ import com.zzz.pinchit.feature_compress.presentation.image_comp.ImageCompressorV
 import com.zzz.pinchit.feature_compress.presentation.image_comp.ImageCompPage
 import com.zzz.pinchit.feature_compress.presentation.pdf_comp.PDFCompPage
 import com.zzz.pinchit.feature_compress.presentation.pdf_comp.PDFCompressorViewModel
+import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocScannerActions
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocumentScannerViewModel
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.ImageToPdfPage
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun Navigation(
@@ -42,16 +45,7 @@ fun Navigation(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) { activityResult ->
-        if(activityResult.resultCode == Activity.RESULT_OK){
-            val result = GmsDocumentScanningResult.fromActivityResultIntent(activityResult.data)
-            result?.pdf?.let {
 
-            }
-        }
-    }
 
     //view models
     val imageCompressorViewModel = remember{ ImageCompressorViewModel(context) }
@@ -60,7 +54,22 @@ fun Navigation(
 
 
     val imageUIState by imageCompressorViewModel.uiState.collectAsStateWithLifecycle()
+    val imageEvents : Flow<CompressImageEvents> by lazy { imageCompressorViewModel.events }
 
+    val docScannerUIState by documentScannerViewModel.uiState.collectAsStateWithLifecycle()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { activityResult ->
+        if(activityResult.resultCode == Activity.RESULT_OK){
+            val result = GmsDocumentScanningResult.fromActivityResultIntent(activityResult.data)
+            result?.pdf?.let {pdf->
+                documentScannerViewModel.onAction(DocScannerActions.OnUriReady(pdf.uri))
+            }
+        }
+    }
+
+    /*
     ObserveAsEvents(events = imageCompressorViewModel.events) { event->
         when(event){
             CompressImageEvents.OnSaveSuccess->{
@@ -71,6 +80,8 @@ fun Navigation(
             }
         }
     }
+
+     */
     Scaffold(
         topBar = {
             Box(
@@ -110,6 +121,7 @@ fun Navigation(
                     }
                     ImageCompPage(
                         state = imageUIState,
+                        events = imageEvents,
                         onAction = {action->
                             imageCompressorViewModel.onAction(action)
                         }
@@ -124,7 +136,27 @@ fun Navigation(
                 }
                 composable<Screen.IMGToPDFScreen> {
                     ImageToPdfPage(
-                        documentScannerViewModel
+                        state = docScannerUIState,
+                        onAction = {action->
+                            when(action){
+                                DocScannerActions.OnGet->{
+                                    documentScannerViewModel.startScan(
+                                        onSuccess = {
+                                            launcher.launch(
+                                                IntentSenderRequest.Builder(it).build()
+                                            )
+                                        } ,
+                                        onError = {
+
+                                        }
+
+                                    )
+                                }
+                                else->{
+                                    documentScannerViewModel.onAction(action)
+                                }
+                            }
+                        }
                     )
                 }
             }

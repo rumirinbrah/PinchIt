@@ -1,6 +1,7 @@
 package com.zzz.pinchit.feature_compress.presentation.image_comp
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,15 +24,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.request.ImageRequest
+import com.zzz.pinchit.core.presentation.util.ObserveAsEvents
+import com.zzz.pinchit.feature_compress.CompressImageEvents
 import com.zzz.pinchit.feature_compress.presentation.CompImageAction
 import com.zzz.pinchit.feature_compress.presentation.image_comp.components.ImageQualityOptions
 import com.zzz.pinchit.feature_compress.presentation.image_comp.components.PreviewImageWithTitle
 import com.zzz.pinchit.feature_compress.presentation.util.VerticalSpace
+import kotlinx.coroutines.flow.Flow
 import kotlin.math.roundToInt
 
 @Composable
 fun ImageCompPage(
     state: CompImageUIState ,
+    events : Flow<CompressImageEvents>,
     onAction: (CompImageAction) -> Unit ,
 ) {
     val context = LocalContext.current
@@ -45,6 +50,17 @@ fun ImageCompPage(
             onAction(CompImageAction.OnImageSelect)
         }
     }
+    ObserveAsEvents(events = events) { event->
+        when(event){
+            CompressImageEvents.OnSaveSuccess->{
+                Toast.makeText(context , "Saved!!" , Toast.LENGTH_SHORT).show()
+            }
+            CompressImageEvents.OnError->{
+                Toast.makeText(context , "Failed to save" , Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
     Column(
         Modifier

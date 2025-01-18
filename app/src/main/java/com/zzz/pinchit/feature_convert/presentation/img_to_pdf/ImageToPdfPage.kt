@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,14 +21,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
+import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.components.RenameDialog
 
 @Composable
 fun ImageToPdfPage(
-    documentScannerViewModel: DocumentScannerViewModel,
+    state: DocScannerUIState,
     onAction :(DocScannerActions)->Unit
 ) {
     var uris by remember{ mutableStateOf<List<Uri>>(emptyList()) }
 
+    /*
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) {activityResult->
@@ -37,11 +40,13 @@ fun ImageToPdfPage(
                 it.imageUri
             } ?: emptyList()
             result?.pdf?.let {pdf->
-                documentScannerViewModel.savePDFToDevice(pdf.uri)
+                //documentScannerViewModel.savePDFToDevice(pdf.uri)
             }
         }
 
     }
+
+     */
 
 
     Column(
@@ -64,7 +69,7 @@ fun ImageToPdfPage(
 //                        println("error ${it.printStackTrace()}")
 //                    }
 //                )
-
+                onAction(DocScannerActions.OnGet)
             }
         ) {
             Text(
@@ -73,8 +78,14 @@ fun ImageToPdfPage(
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
-        uris.onEachIndexed { index,uri->
-            println("Uri no $index")
+
+        if(state.showRenameDialog){
+            RenameDialog(
+                name = state.fileName,
+                onDone = {
+                    onAction(DocScannerActions.OnSaveFile(it))
+                }
+            )
         }
     }
 }
