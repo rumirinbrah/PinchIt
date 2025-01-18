@@ -23,4 +23,10 @@ val items = listOf(
         body = "Reduce PDF size without compromising much quality" ,
         icon = R.drawable.pdf_icon
     ),
+    FeatureItem(
+        route = Screen.IMGToPDFScreen ,
+        title = "Convert IMG to PDF" ,
+        body = "Either use a text scanner to scan text files or upload from gallery" ,
+        icon = R.drawable.jpg_to_pdf
+    )
 )

@@ -50,10 +50,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    //compressor
-    implementation("id.zelory:compressor:3.0.1")
     //coil
     implementation(libs.coil.compose)
+
+    //google ml kit for pdf converter
+    implementation(libs.play.services.mlkit.document.scanner)
 
 
 

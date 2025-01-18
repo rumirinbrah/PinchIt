@@ -1,4 +1,4 @@
-package com.zzz.pinchit.feature_compress.presentation
+package com.zzz.pinchit.feature_compress.presentation.image_comp
 
 import android.content.ContentValues
 import android.content.ContentValues.TAG
@@ -13,8 +13,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zzz.pinchit.feature_compress.CompressImageEvents
-import com.zzz.pinchit.feature_compress.presentation.image_comp.CompImageUIState
-import com.zzz.pinchit.feature_compress.presentation.image_comp.CompressPhase
+import com.zzz.pinchit.feature_compress.presentation.CompImageAction
+import com.zzz.pinchit.feature_compress.presentation.CompressImageState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.ensureActive
@@ -29,7 +29,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import kotlin.random.Random
 
-class CompressorViewModel(
+class ImageCompressorViewModel(
     private val context: Context
 ) : ViewModel() {
 
@@ -50,7 +50,7 @@ class CompressorViewModel(
                 }
             }
             //ui
-            CompImageAction.OnImageSelect->{
+            CompImageAction.OnImageSelect ->{
                 _uiState.update {
                     it.copy(phase = CompressPhase.IMAGE_SELECTED)
                 }
@@ -64,7 +64,7 @@ class CompressorViewModel(
                 saveCompressedImage()
             }
             //cancel
-            CompImageAction.OnCancel->{
+            CompImageAction.OnCancel ->{
                 resetStates()
             }
         }
@@ -139,11 +139,11 @@ class CompressorViewModel(
     //save IMAGE INFO
     private fun saveFileInfo(uri: Uri) {
 
-        val a = SimpleDateFormat("yyyy").format(System.currentTimeMillis())
+        val name = SimpleDateFormat("yyyy").format(System.currentTimeMillis())
         val type = context.contentResolver.getType(uri)
         compressImageState.update {
             it.copy(
-                fileName = "$a${System.currentTimeMillis()}${Random.nextInt()}" ,
+                fileName = "$name${System.currentTimeMillis()}${Random.nextInt()}" ,
                 fileType = type
             )
         }
