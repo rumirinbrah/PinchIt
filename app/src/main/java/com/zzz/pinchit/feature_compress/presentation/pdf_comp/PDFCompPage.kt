@@ -9,6 +9,14 @@ import android.os.ParcelFileDescriptor
 import android.webkit.MimeTypeMap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateValue
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +33,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.zzz.pinchit.feature_compress.presentation.pdf_comp.components.PDFPage
 import java.io.File
@@ -44,19 +55,39 @@ fun PDFCompPage(
         currentPdf = it
     }
 
-    LaunchedEffect(currentPdf) {
-        if(currentPdf!=null){
-            pdfBitmap = pdfCompressorViewModel.pdfToBitmap(currentPdf!!)
-            //pdfCompressorViewModel.getBitmap(currentPdf!!)
-        }
-    }
+    val infiniteAnimation = rememberInfiniteTransition()
+    val progress = infiniteAnimation.animateValue(
+        initialValue = 0,
+        targetValue = 4,
+        animationSpec = infiniteRepeatable(
+            tween(2000),
+            repeatMode = RepeatMode.Restart
+        ),
+        typeConverter = Int.VectorConverter,
+        label = "dots"
+    )
+
+//    LaunchedEffect(currentPdf) {
+//        if(currentPdf!=null){
+//            pdfBitmap = pdfCompressorViewModel.pdfToBitmap(currentPdf!!)
+//            //pdfCompressorViewModel.getBitmap(currentPdf!!)
+//        }
+//    }
 
 
     Column(
         Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        when{
+
+        Text("Work In Progress"+".".repeat(progress.value))
+
+
+    }
+}
+/*
+when{
             currentPdf==null->{
                 Button(
                     onClick = {
@@ -84,19 +115,4 @@ fun PDFCompPage(
                 }
             }
         }
-
-
-
-    }
-}
-fun idk(uri: Uri){
-}
-private fun getByteArray(context: Context,uri : Uri):ByteArray?{
-    val inputBytes = context
-        .contentResolver
-        .openInputStream(uri)
-        ?.use { inputStream ->
-            inputStream.readBytes()
-        }
-    return inputBytes
-}
+ */

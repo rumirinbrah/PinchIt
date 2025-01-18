@@ -16,9 +16,11 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanner
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -33,9 +35,12 @@ class DocumentScannerViewModel(
     private val _uiState = MutableStateFlow(DocScannerUIState())
     val uiState = _uiState.asStateFlow()
 
+    private val _events = Channel<DocScannerEvents>()
+    val events = _events.receiveAsFlow()
+
 
     private val scannerOptions = GmsDocumentScannerOptions.Builder()
-        .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+        .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_BASE)
         .setGalleryImportAllowed(true)
         .setPageLimit(20)
         .setResultFormats(
@@ -47,6 +52,7 @@ class DocumentScannerViewModel(
         GmsDocumentScanning.getClient(scannerOptions)
     }
 
+    //action
     fun onAction(action: DocScannerActions) {
         when (action) {
             DocScannerActions.OnGet -> {
@@ -60,7 +66,8 @@ class DocumentScannerViewModel(
                             pdfUri = action.uri ,
                         )
                     }
-                    delay(2000)
+                    saveFileInfo()
+                    delay(800)
                     showDialog()
                 }
 
@@ -73,14 +80,17 @@ class DocumentScannerViewModel(
         }
     }
 
+    //dialog
     private fun hideDialog() {
         _uiState.update {
             it.copy(
+                loading = true,
                 showRenameDialog = false
             )
         }
     }
 
+    //dialog
     private fun showDialog() {
         _uiState.update {
             it.copy(
@@ -90,22 +100,26 @@ class DocumentScannerViewModel(
     }
 
 
+    //scan images
     fun startScan(
-        onSuccess: (IntentSender) -> Unit ,
-        onError: (Exception) -> Unit ,
+        onSuccess: (IntentSender) -> Unit
     ) {
         documentScanner.getStartScanIntent(context as Activity)
             .addOnSuccessListener {
                 onSuccess(it)
             }
             .addOnFailureListener {
-                onError(it)
+                viewModelScope.launch {
+                    _events.send(DocScannerEvents.Error("Available RAM not enough!"))
+                }
             }
     }
 
+    //save file name
     private fun saveFileInfo() {
         val date = SimpleDateFormat("yyyy").format(System.currentTimeMillis())
         val name = "$date${System.currentTimeMillis()}${Random.nextInt()}"
+        Log.d("doc", "saveFileInfo: Doc name is $name ")
 
         docState.update {
             it.copy(
@@ -117,11 +131,11 @@ class DocumentScannerViewModel(
         }
     }
 
-    fun savePDFToDevice(fileName: String) {
+    //save PDF to device
+    private fun savePDFToDevice(fileName: String) {
         Log.d("doc" , "Saving to device")
 
         //val idk = MediaStore.Files.FileColumns.DOCUMENT_ID
-        saveFileInfo()
         val timeStamp = System.currentTimeMillis()
         val values = ContentValues()
         val docState = docState.value
@@ -159,12 +173,19 @@ class DocumentScannerViewModel(
                             }
                         values.put(MediaStore.Files.FileColumns.IS_PENDING , false)
                         context.contentResolver.update(uri , values , null , null)
+                        _events.send(DocScannerEvents.Success)
                         Log.d("doc" , "Successful!!!")
                     } catch (e: Exception) {
+                        _events.send(DocScannerEvents.Error("Oops! Unable to save file"))
                         Log.e("doc" , "savePDFToDevice: Failed" , e)
                     }
                 }
 
+            }else{
+
+            }
+            _uiState.update {
+                it.copy(loading = false)
             }
 
         }

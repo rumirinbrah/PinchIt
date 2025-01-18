@@ -35,6 +35,7 @@ import com.zzz.pinchit.feature_compress.presentation.image_comp.ImageCompPage
 import com.zzz.pinchit.feature_compress.presentation.pdf_comp.PDFCompPage
 import com.zzz.pinchit.feature_compress.presentation.pdf_comp.PDFCompressorViewModel
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocScannerActions
+import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocScannerEvents
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocumentScannerViewModel
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.ImageToPdfPage
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +58,7 @@ fun Navigation(
     val imageEvents : Flow<CompressImageEvents> by lazy { imageCompressorViewModel.events }
 
     val docScannerUIState by documentScannerViewModel.uiState.collectAsStateWithLifecycle()
+    val docEvents : Flow<DocScannerEvents> by lazy { documentScannerViewModel.events }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -107,6 +109,7 @@ fun Navigation(
                 navController = navController,
                 startDestination = Screen.HomeScreen
             ) {
+                //HOME
                 composable<Screen.HomeScreen> {
                     HomePage(
                         onFeatureClick = {
@@ -114,6 +117,7 @@ fun Navigation(
                         }
                     )
                 }
+                //image compressor
                 composable<Screen.ImageCompScreen> {
                     BackHandler {
                         imageCompressorViewModel.onAction(CompImageAction.OnCancel)
@@ -127,6 +131,7 @@ fun Navigation(
                         }
                     )
                 }
+                //pdf compressor
                 composable<Screen.PDFCompScreen> {
                     BackHandler {
                         //pdfCompressorViewModel.renderer?.close()
@@ -134,9 +139,11 @@ fun Navigation(
                     }
                     PDFCompPage(pdfCompressorViewModel)
                 }
+                //Doc scanner
                 composable<Screen.IMGToPDFScreen> {
                     ImageToPdfPage(
                         state = docScannerUIState,
+                        events = docEvents,
                         onAction = {action->
                             when(action){
                                 DocScannerActions.OnGet->{
@@ -145,11 +152,7 @@ fun Navigation(
                                             launcher.launch(
                                                 IntentSenderRequest.Builder(it).build()
                                             )
-                                        } ,
-                                        onError = {
-
                                         }
-
                                     )
                                 }
                                 else->{
