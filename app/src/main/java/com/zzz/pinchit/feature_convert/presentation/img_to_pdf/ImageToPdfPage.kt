@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import com.zzz.pinchit.core.presentation.util.ObserveAsEvents
+import com.zzz.pinchit.feature_compress.presentation.util.VerticalSpace
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.components.RenameDialog
 import kotlinx.coroutines.flow.Flow
 

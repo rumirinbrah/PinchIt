@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,10 @@ class PDFCompressorViewModel(
 ) : ViewModel() {
 
     var renderer: PdfRenderer? = null
+
+    init {
+        Log.d("runtime", "PDFCompVM init")
+    }
 
     suspend fun pdfToBitmap(pdfUri: Uri): List<Bitmap> {
         renderer?.close()

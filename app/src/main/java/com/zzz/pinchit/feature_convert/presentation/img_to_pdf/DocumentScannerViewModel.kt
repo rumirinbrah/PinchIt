@@ -52,6 +52,10 @@ class DocumentScannerViewModel(
         GmsDocumentScanning.getClient(scannerOptions)
     }
 
+    init {
+        Log.d("runtime", "DocVM init")
+    }
+
     //action
     fun onAction(action: DocScannerActions) {
         when (action) {

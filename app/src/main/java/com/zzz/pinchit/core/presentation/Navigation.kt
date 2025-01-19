@@ -16,7 +16,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
+import com.zzz.pinchit.core.data.local.SharedPref
+import com.zzz.pinchit.core.presentation.components.OneTimeDialog
 import com.zzz.pinchit.core.presentation.util.ObserveAsEvents
 import com.zzz.pinchit.core.presentation.util.Screen
 import com.zzz.pinchit.feature_compress.CompressImageEvents
@@ -60,6 +64,7 @@ fun Navigation(
     val docScannerUIState by documentScannerViewModel.uiState.collectAsStateWithLifecycle()
     val docEvents : Flow<DocScannerEvents> by lazy { documentScannerViewModel.events }
 
+    //for doc scanner
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { activityResult ->
@@ -70,6 +75,8 @@ fun Navigation(
             }
         }
     }
+
+    var dialogFlag by remember { mutableStateOf(SharedPref.getFlagStatus(context)) }
 
     /*
     ObserveAsEvents(events = imageCompressorViewModel.events) { event->
@@ -162,6 +169,11 @@ fun Navigation(
                         }
                     )
                 }
+            }
+            //Show one time dialog
+            if(!dialogFlag){
+                OneTimeDialog(onDismiss = {dialogFlag = true})
+
             }
         }
     }

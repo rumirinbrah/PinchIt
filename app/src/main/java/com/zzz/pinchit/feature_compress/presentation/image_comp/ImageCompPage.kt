@@ -53,7 +53,7 @@ fun ImageCompPage(
     ObserveAsEvents(events = events) { event->
         when(event){
             CompressImageEvents.OnSaveSuccess->{
-                Toast.makeText(context , "Saved!!" , Toast.LENGTH_SHORT).show()
+                Toast.makeText(context , "Saved to gallery!!" , Toast.LENGTH_SHORT).show()
             }
             CompressImageEvents.OnError->{
                 Toast.makeText(context , "Failed to save" , Toast.LENGTH_SHORT).show()

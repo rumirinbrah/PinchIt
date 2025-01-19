@@ -41,6 +41,11 @@ class ImageCompressorViewModel(
     private val _events = Channel<CompressImageEvents>()
     val events = _events.receiveAsFlow()
 
+    init {
+        Log.d("runtime", "ImageCompVM init")
+    }
+
+
     fun onAction(action: CompImageAction) {
         when (action) {
             //ui
