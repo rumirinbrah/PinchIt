@@ -12,7 +12,6 @@ import com.zzz.pinchit.core.presentation.util.Screen
 
 @Composable
 fun HomePage(
-    modifier: Modifier = Modifier,
     onFeatureClick : (Screen) ->Unit
 ) {
 

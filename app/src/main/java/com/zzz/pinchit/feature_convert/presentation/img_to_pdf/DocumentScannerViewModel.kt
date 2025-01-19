@@ -4,12 +4,9 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
 import android.content.IntentSender
-import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.provider.MediaStore.Audio.Media
 import android.util.Log
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanner
