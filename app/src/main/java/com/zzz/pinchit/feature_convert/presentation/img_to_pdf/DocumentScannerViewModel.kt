@@ -172,6 +172,8 @@ class DocumentScannerViewModel(
                             ?.use { opStream ->
                                 opStream.write(byteArray)
                             }
+                        //added this weird thing
+                        //values.clear()
                         values.put(MediaStore.Files.FileColumns.IS_PENDING , false)
                         context.contentResolver.update(uri , values , null , null)
                         _events.send(DocScannerEvents.Success)

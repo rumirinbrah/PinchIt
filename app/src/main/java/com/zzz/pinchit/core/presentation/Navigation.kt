@@ -26,12 +26,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import com.zzz.pinchit.core.data.local.SharedPref
 import com.zzz.pinchit.core.presentation.components.OneTimeDialog
+import com.zzz.pinchit.core.presentation.util.DeepLink
 import com.zzz.pinchit.core.presentation.util.Screen
-import com.zzz.pinchit.feature_compress.CompressImageEvents
-import com.zzz.pinchit.feature_compress.presentation.CompImageAction
+import com.zzz.pinchit.core.presentation.util.hasExternalStoragePermission
+import com.zzz.pinchit.core.presentation.util.requestExternalStoragePermission
+import com.zzz.pinchit.feature_compress.presentation.image_comp.CompImageAction
+import com.zzz.pinchit.feature_compress.presentation.image_comp.CompressImageEvents
 import com.zzz.pinchit.feature_compress.presentation.image_comp.ImageCompPage
 import com.zzz.pinchit.feature_compress.presentation.image_comp.ImageCompressorViewModel
 import com.zzz.pinchit.feature_compress.presentation.pdf_comp.PDFCompPage
@@ -44,14 +48,16 @@ import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun Navigation(
+    startDestination : Screen,
     navController: NavHostController,
+    imageCompressorViewModel: ImageCompressorViewModel,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
 
     //view models
-    val imageCompressorViewModel = remember{ ImageCompressorViewModel(context) }
+//    val imageCompressorViewModel = remember{ ImageCompressorViewModel(context) }
     val pdfCompressorViewModel = remember { PDFCompressorViewModel(context) }
     val documentScannerViewModel = remember { DocumentScannerViewModel(context) }
 
@@ -75,6 +81,12 @@ fun Navigation(
     }
 
     var dialogFlag by remember { mutableStateOf(SharedPref.getFlagStatus(context)) }
+
+    println("Permission ${hasExternalStoragePermission(context)}")
+    if(!hasExternalStoragePermission(context)){
+        requestExternalStoragePermission(context)
+    }
+
 
     /*
     ObserveAsEvents(events = imageCompressorViewModel.events) { event->
@@ -112,7 +124,7 @@ fun Navigation(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = Screen.HomeScreen
+                startDestination = startDestination
             ) {
                 //HOME
                 composable<Screen.HomeScreen> {
@@ -123,7 +135,13 @@ fun Navigation(
                     )
                 }
                 //image compressor
-                composable<Screen.ImageCompScreen> {
+                composable<Screen.ImageCompScreen>(
+                    deepLinks = listOf(
+                        navDeepLink {
+                            uriPattern = DeepLink.IMAGE_COMPRESS
+                        }
+                    )
+                ) {
                     BackHandler {
                         imageCompressorViewModel.onAction(CompImageAction.OnCancel)
                         navController.navigateUp()

@@ -12,9 +12,6 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zzz.pinchit.feature_compress.CompressImageEvents
-import com.zzz.pinchit.feature_compress.presentation.CompImageAction
-import com.zzz.pinchit.feature_compress.presentation.CompressImageState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.ensureActive
@@ -26,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import kotlin.random.Random
 
@@ -42,7 +40,7 @@ class ImageCompressorViewModel(
     val events = _events.receiveAsFlow()
 
     init {
-        Log.d("runtime", "ImageCompVM init")
+        Log.d("runtime" , "ImageCompVM init")
     }
 
 
@@ -55,21 +53,24 @@ class ImageCompressorViewModel(
                 }
             }
             //ui
-            CompImageAction.OnImageSelect ->{
+            is CompImageAction.OnImageSelect -> {
                 _uiState.update {
-                    it.copy(phase = CompressPhase.IMAGE_SELECTED)
+                    it.copy(
+                        phase = CompressPhase.IMAGE_SELECTED,
+                        currentImage = action.uri
+                    )
                 }
             }
             //compress
             is CompImageAction.OnCompress -> {
-                compressImage(action.uri)
+                compressImage(_uiState.value.currentImage!!)
             }
             //save
             CompImageAction.OnSave -> {
                 saveCompressedImage()
             }
             //cancel
-            CompImageAction.OnCancel ->{
+            CompImageAction.OnCancel -> {
                 resetStates()
             }
         }
@@ -128,7 +129,7 @@ class ImageCompressorViewModel(
                 }
 
                 _uiState.update {
-                    it.copy(compressedImage = outputBytes, phase = CompressPhase.IMAGE_COMPRESSED)
+                    it.copy(compressedImage = outputBytes , phase = CompressPhase.IMAGE_COMPRESSED)
                 }
                 println("Image compressed")
 
@@ -202,39 +203,50 @@ class ImageCompressorViewModel(
                     }
                 }
             } else {
-                val fileFolder = File("${Environment.getExternalStorageDirectory()}/PinchIt")
-                if (!fileFolder.exists()) {
-                    fileFolder.mkdirs()
+                Log.d("image", "Step1 In else block ")
+
+                val fileDir = "${Environment.DIRECTORY_PICTURES}/PinchIt"
+                val fileName = imageState.fileName
+                val imageFile = File(fileDir,fileName?:"unknown")
+
+                Log.d("image", "Step2 File path is ${imageFile.absolutePath} ")
+                Log.d("image", "Step2 File name is ${imageFile.name} ")
+
+                values.put(MediaStore.Images.Media.RELATIVE_PATH , imageState.relativePath)
+
+                val uri = MediaStore.Images.Media.getContentUri("external")//context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values)
+                Log.d("image", "Step3 Inserting into content resolver")
+                uri?.let {fileUri->
+                    try {
+                        Log.d("image", "Step4 In try block attempting to open OutputStream ")
+                        context.contentResolver
+                            .openOutputStream(fileUri)
+                            ?.use {opStream->
+                                opStream.write(_uiState.value.compressedImage)
+                            }
+                        Log.d("image", "Step5 Updating content resolver ")
+                        context.contentResolver.update(fileUri,values,null,null)
+                        Log.d("image", "Step6 Putting data in media store ")
+                        values.put(MediaStore.Images.Media.DATA , imageFile.absolutePath)
+                        _events.send(CompressImageEvents.OnSaveSuccess)
+
+                    } catch (e: Exception) {
+                        Log.d(TAG , "saveBitmapToGallery: ${e.printStackTrace()}")
+                        _events.send(CompressImageEvents.OnError)
+                    }
                 }
 
-                val imageFile = File(fileFolder , imageState.fileName!!)
-                try {
-                    context.openFileOutput(imageFile.absolutePath , Context.MODE_PRIVATE)
-                        ?.use { opStream ->
-                            opStream.write(_uiState.value.compressedImage)
-                        }
-
-                    values.put(MediaStore.Images.Media.DATA , imageFile.absolutePath)
-                    context.contentResolver.insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI ,
-                        values
-                    )
-
-                    //SUCCESS
-                    _events.send(CompressImageEvents.OnSaveSuccess)
-                    //resetStates()
-                    //Toast.makeText(context , "Saved!" , Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) {
-                    Log.e(TAG , "saveBitmapToGallery: ${e.printStackTrace()}")
-                    _events.send(CompressImageEvents.OnError)
-                }
             }
             _uiState.update {
                 it.copy(loading = false)
             }
         }
     }
-    private fun resetStates(){
+/*
+val bitmap = BitmapFactory.decodeByteArray(_uiState.value.compressedImage,0,_uiState.value.compressedImage!!.size)
+ MediaStore.Images.Media.insertImage(context.contentResolver,bitmap,fileName,"")
+ */
+    private fun resetStates() {
         _uiState.update {
             CompImageUIState()
         }

@@ -1,4 +1,4 @@
-package com.zzz.pinchit.feature_compress
+package com.zzz.pinchit.feature_compress.presentation.image_comp
 
 interface CompressImageEvents {
     data object OnSaveSuccess : CompressImageEvents

@@ -1,6 +1,5 @@
 package com.zzz.pinchit.feature_compress.presentation.image_comp
 
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -10,23 +9,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.request.ImageRequest
 import com.zzz.pinchit.core.presentation.util.ObserveAsEvents
-import com.zzz.pinchit.feature_compress.CompressImageEvents
-import com.zzz.pinchit.feature_compress.presentation.CompImageAction
 import com.zzz.pinchit.feature_compress.presentation.image_comp.components.ImageQualityOptions
 import com.zzz.pinchit.feature_compress.presentation.image_comp.components.PreviewImageWithTitle
 import com.zzz.pinchit.feature_compress.presentation.util.VerticalSpace
@@ -36,18 +31,16 @@ import kotlin.math.roundToInt
 @Composable
 fun ImageCompPage(
     state: CompImageUIState ,
-    events : Flow<CompressImageEvents>,
+    events : Flow<CompressImageEvents> ,
     onAction: (CompImageAction) -> Unit ,
 ) {
     val context = LocalContext.current
-    var currentImage by remember { mutableStateOf<Uri?>(null) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            currentImage = it
-            onAction(CompImageAction.OnImageSelect)
+            onAction(CompImageAction.OnImageSelect(uri))
         }
     }
     ObserveAsEvents(events = events) { event->
@@ -65,6 +58,7 @@ fun ImageCompPage(
     Column(
         Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp) ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -97,7 +91,7 @@ fun ImageCompPage(
 
                 PreviewImageWithTitle(
                     model = ImageRequest.Builder(context)
-                        .data(currentImage)
+                        .data(state.currentImage)
                         .crossfade(true)
                         .build() ,
                     title = "Selected Image"
@@ -112,7 +106,7 @@ fun ImageCompPage(
                 Button(
                     enabled = !state.loading ,
                     onClick = {
-                        onAction(CompImageAction.OnCompress(currentImage!!))
+                        onAction(CompImageAction.OnCompress)
                     }
                 ) {
                     Text(
