@@ -28,5 +28,11 @@ val items = listOf(
         title = "Convert IMG to PDF" ,
         body = "Either use a text scanner to scan text files or upload from gallery" ,
         icon = R.drawable.jpg_to_pdf
+    ),
+    FeatureItem(
+        route = Screen.PDFToIMGScreen ,
+        title = "Convert PDF to IMG" ,
+        body = "Easily convert PDF files back to images" ,
+        icon = R.drawable.pdf_to_img
     )
 )

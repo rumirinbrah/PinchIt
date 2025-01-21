@@ -20,7 +20,7 @@ class PDFCompressorViewModel(
     private val context: Context
 ) : ViewModel() {
 
-    var renderer: PdfRenderer? = null
+    private var renderer: PdfRenderer? = null
 
     init {
         Log.d("runtime", "PDFCompVM init")

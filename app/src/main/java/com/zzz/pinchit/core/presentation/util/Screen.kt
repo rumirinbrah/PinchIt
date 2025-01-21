@@ -7,4 +7,5 @@ sealed class Screen {
     @Serializable data object ImageCompScreen : Screen()
     @Serializable data object PDFCompScreen : Screen()
     @Serializable data object IMGToPDFScreen : Screen()
+    @Serializable data object PDFToIMGScreen : Screen()
 }

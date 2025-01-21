@@ -44,6 +44,8 @@ import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocScannerActions
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocScannerEvents
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocumentScannerViewModel
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.ImageToPdfPage
+import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImagePage
+import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImageViewModel
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -60,6 +62,7 @@ fun Navigation(
 //    val imageCompressorViewModel = remember{ ImageCompressorViewModel(context) }
     val pdfCompressorViewModel = remember { PDFCompressorViewModel(context) }
     val documentScannerViewModel = remember { DocumentScannerViewModel(context) }
+    val pdfToImageViewModel = remember { PdfToImageViewModel(context) }
 
 
     val imageUIState by imageCompressorViewModel.uiState.collectAsStateWithLifecycle()
@@ -67,6 +70,8 @@ fun Navigation(
 
     val docScannerUIState by documentScannerViewModel.uiState.collectAsStateWithLifecycle()
     val docEvents : Flow<DocScannerEvents> by lazy { documentScannerViewModel.events }
+
+    val pdfToImgUIState by pdfToImageViewModel.uiState.collectAsStateWithLifecycle()
 
     //for doc scanner
     val launcher = rememberLauncherForActivityResult(
@@ -182,6 +187,15 @@ fun Navigation(
                                     documentScannerViewModel.onAction(action)
                                 }
                             }
+                        }
+                    )
+                }
+                //PDF to img
+                composable<Screen.PDFToIMGScreen> {
+                    PdfToImagePage(
+                        state = pdfToImgUIState,
+                        onAction = {action->
+                            pdfToImageViewModel.onAction(action)
                         }
                     )
                 }
