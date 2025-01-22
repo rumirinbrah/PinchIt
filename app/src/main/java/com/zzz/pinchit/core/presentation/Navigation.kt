@@ -46,6 +46,9 @@ import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.DocumentScannerVi
 import com.zzz.pinchit.feature_convert.presentation.img_to_pdf.ImageToPdfPage
 import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImagePage
 import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImageViewModel
+import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImgActions
+import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImgEvents
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -72,6 +75,7 @@ fun Navigation(
     val docEvents : Flow<DocScannerEvents> by lazy { documentScannerViewModel.events }
 
     val pdfToImgUIState by pdfToImageViewModel.uiState.collectAsStateWithLifecycle()
+    val pdfToImgEvents : Flow<PdfToImgEvents> by lazy { pdfToImageViewModel.events }
 
     //for doc scanner
     val launcher = rememberLauncherForActivityResult(
@@ -194,6 +198,11 @@ fun Navigation(
                 composable<Screen.PDFToIMGScreen> {
                     PdfToImagePage(
                         state = pdfToImgUIState,
+                        events = pdfToImgEvents,
+                        onDone = {
+                            navController.navigateUp()
+                            pdfToImageViewModel.onAction(PdfToImgActions.OnClear)
+                        },
                         onAction = {action->
                             pdfToImageViewModel.onAction(action)
                         }

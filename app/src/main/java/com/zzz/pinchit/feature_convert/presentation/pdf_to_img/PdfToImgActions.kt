@@ -7,5 +7,6 @@ sealed class PdfToImgActions {
     data class OnPdfSelect(val pdfUri: Uri) : PdfToImgActions()
     data object OnConvert : PdfToImgActions()
     data object OnCancel : PdfToImgActions()
+    data object OnClear : PdfToImgActions()
 
 }

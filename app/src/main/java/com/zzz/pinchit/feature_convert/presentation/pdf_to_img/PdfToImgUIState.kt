@@ -4,12 +4,16 @@ import android.net.Uri
 
 data class PdfToImgUIState(
     val uri: Uri? = null,
-    val phase: PdfToImgPhase = PdfToImgPhase.IDLE
+    val phase: PdfToImgPhase = PdfToImgPhase.IDLE,
+    val saveProgress : Float = 0.05f
 )
 enum class PdfToImgPhase{
     IDLE,
     RENDER,
-    READY
+    READY,
+    SAVING,
+    SAVED,
+    ERROR
 }
 
 
