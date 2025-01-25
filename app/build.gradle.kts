@@ -42,6 +42,9 @@ android {
 
 dependencies {
 
+    //splash
+    implementation("androidx.core:core-splashscreen:1.0.0")
+
     //serialization
     implementation(libs.kotlinx.serialization.json)
     //nav compose

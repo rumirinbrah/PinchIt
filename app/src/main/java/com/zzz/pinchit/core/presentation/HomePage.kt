@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.zzz.pinchit.core.presentation.components.HomeFeatureItem
 import com.zzz.pinchit.core.presentation.util.Screen
+import com.zzz.pinchit.feature_compress.presentation.util.VerticalSpace
 
 @Composable
 fun HomePage(
@@ -27,6 +28,7 @@ fun HomePage(
         Modifier.fillMaxSize()
             .padding(horizontal = 8.dp)
     ) {
+        VerticalSpace()
         LazyColumn(
             Modifier.fillMaxWidth()
         ) {

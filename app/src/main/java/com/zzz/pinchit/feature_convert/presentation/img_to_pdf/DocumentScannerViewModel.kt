@@ -35,15 +35,15 @@ class DocumentScannerViewModel(
     private val _events = Channel<DocScannerEvents>()
     val events = _events.receiveAsFlow()
 
-
     private val scannerOptions = GmsDocumentScannerOptions.Builder()
-        .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_BASE)
+        .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
         .setGalleryImportAllowed(true)
         .setPageLimit(20)
         .setResultFormats(
             GmsDocumentScannerOptions.RESULT_FORMAT_JPEG ,
             GmsDocumentScannerOptions.RESULT_FORMAT_PDF
         )
+        .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_PDF)
         .build()
     private val documentScanner: GmsDocumentScanner by lazy {
         GmsDocumentScanning.getClient(scannerOptions)
@@ -56,8 +56,9 @@ class DocumentScannerViewModel(
     //action
     fun onAction(action: DocScannerActions) {
         when (action) {
-            DocScannerActions.OnGet -> {
-                Unit
+            DocScannerActions.OnGet -> Unit
+            DocScannerActions.OnCancel ->{
+                resetStates()
             }
 
             is DocScannerActions.OnUriReady -> {
@@ -122,11 +123,13 @@ class DocumentScannerViewModel(
         val name = "$date${System.currentTimeMillis()}${Random.nextInt()}"
         Log.d("doc", "saveFileInfo: Doc name is $name ")
 
-        docState.update {
+        /*docState.update {
             it.copy(
                 fileName = name ,
             )
         }
+
+         */
         _uiState.update {
             it.copy(fileName = name)
         }
@@ -191,6 +194,13 @@ class DocumentScannerViewModel(
                 it.copy(loading = false)
             }
 
+        }
+    }
+
+    private fun resetStates(){
+        docState.update { it.copy(pdfUri = null) }
+        _uiState.update {
+            DocScannerUIState()
         }
     }
 

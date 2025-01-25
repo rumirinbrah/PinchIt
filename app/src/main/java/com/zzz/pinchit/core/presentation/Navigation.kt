@@ -5,6 +5,11 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -98,16 +104,7 @@ fun Navigation(
 
 
     /*
-    ObserveAsEvents(events = imageCompressorViewModel.events) { event->
-        when(event){
-            CompressImageEvents.OnSaveSuccess->{
-                Toast.makeText(context , "Saved!!" , Toast.LENGTH_SHORT).show()
-            }
-            CompressImageEvents.OnError->{
-                Toast.makeText(context , "Failed to save" , Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+
 
      */
     Scaffold(
@@ -133,7 +130,17 @@ fun Navigation(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = startDestination
+                startDestination = startDestination,
+                enterTransition = {
+                    slideInHorizontally()
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = {
+                            it
+                        }
+                    )
+                }
             ) {
                 //HOME
                 composable<Screen.HomeScreen> {
@@ -173,6 +180,7 @@ fun Navigation(
                 }
                 //Doc scanner
                 composable<Screen.IMGToPDFScreen> {
+
                     ImageToPdfPage(
                         state = docScannerUIState,
                         events = docEvents,
@@ -196,6 +204,10 @@ fun Navigation(
                 }
                 //PDF to img
                 composable<Screen.PDFToIMGScreen> {
+                    BackHandler {
+                        navController.navigateUp()
+                        pdfToImageViewModel.onAction(PdfToImgActions.OnClear)
+                    }
                     PdfToImagePage(
                         state = pdfToImgUIState,
                         events = pdfToImgEvents,

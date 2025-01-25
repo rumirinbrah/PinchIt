@@ -62,6 +62,7 @@ class PdfToImageViewModel(
 
     //render
     private fun renderPdf() {
+
         renderer?.close()
         //val images : List<Bitmap> = emptyList()
         viewModelScope.launch {
@@ -76,6 +77,7 @@ class PdfToImageViewModel(
                                 val images = (0 until pageCount).map { index ->
                                     async {
                                         openPage(index).use { page ->
+
                                             val bitmap = Bitmap.createBitmap(
                                                 page.width ,
                                                 page.height ,
@@ -85,11 +87,12 @@ class PdfToImageViewModel(
                                                 drawColor(Color.WHITE)
                                                 drawBitmap(bitmap , 0f , 0f , null)
                                             }
+
                                             page.render(
                                                 bitmap ,
                                                 null ,
                                                 null ,
-                                                PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                                                PdfRenderer.Page.RENDER_MODE_FOR_PRINT
                                             )
                                             bitmap
                                         }
