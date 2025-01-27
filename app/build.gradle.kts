@@ -45,6 +45,9 @@ dependencies {
     //splash
     implementation("androidx.core:core-splashscreen:1.0.0")
 
+    //text recognition
+    implementation ("com.google.mlkit:text-recognition:16.0.1")
+
     //serialization
     implementation(libs.kotlinx.serialization.json)
     //nav compose

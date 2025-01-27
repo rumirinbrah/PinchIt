@@ -1,5 +1,6 @@
 package com.zzz.pinchit.core.presentation.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,7 +31,7 @@ fun HomeFeatureItem(
 ) {
     ElevatedCard(
         onClick = onClick,
-        modifier = Modifier.padding(8.dp),
+        modifier = Modifier.padding(8.dp) ,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -56,9 +58,10 @@ fun HomeFeatureItem(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            Icon(
+            Image(
                 painter = painterResource(featureItem.icon) ,
                 contentDescription = null,
+                //tint = featureItem.iconTint
             )
         }
     }
@@ -75,7 +78,7 @@ private fun FeatureItemPrev() {
                 title = "Compress Image" ,
                 body = "Without wasting any quality" ,
                 icon = R.drawable.jpg_icon,
-
+                iconTint = Color.White
             )
         ) { }
     }

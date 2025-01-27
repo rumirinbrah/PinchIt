@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -247,12 +248,16 @@ val bitmap = BitmapFactory.decodeByteArray(_uiState.value.compressedImage,0,_uiS
  MediaStore.Images.Media.insertImage(context.contentResolver,bitmap,fileName,"")
  */
     private fun resetStates() {
-        _uiState.update {
-            CompImageUIState()
+        viewModelScope.launch {
+            delay(300)
+            _uiState.update {
+                CompImageUIState()
+            }
+            compressImageState.update {
+                CompressImageState()
+            }
         }
-        compressImageState.update {
-            CompressImageState()
-        }
+
     }
 
 

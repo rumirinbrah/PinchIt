@@ -23,10 +23,11 @@ val darkPrimary = Color(0xFF1A6994)
 val darkError = Color(0xFF941A1A)
 
 //icons
-val compImgTint = Color(0xFFFFBD5D)
-val compPdfTint = Color(0xFFFD5A4E)
-val imgToPdfTint = Color(0xFF68F36D)
-val pdfToImgTint = Color(0xFF4EADF8)
+val compImgTint = Color(0xFFFFAE52)
+val compPdfTint = Color(0xFFFF7182)
+val imgToPdfTint = Color(0xFF4FEA55)
+val pdfToImgTint = Color(0xFF75C1FF)
+val ocrTint = Color(0xFFCBBB2F)
 
 
 

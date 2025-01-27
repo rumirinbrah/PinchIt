@@ -54,6 +54,10 @@ import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImagePage
 import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImageViewModel
 import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImgActions
 import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImgEvents
+import com.zzz.pinchit.feature_ocr.presentation.OCRPage
+import com.zzz.pinchit.feature_ocr.presentation.OcrActions
+import com.zzz.pinchit.feature_ocr.presentation.OcrUIState
+import com.zzz.pinchit.feature_ocr.presentation.OcrViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 
@@ -72,6 +76,7 @@ fun Navigation(
     val pdfCompressorViewModel = remember { PDFCompressorViewModel(context) }
     val documentScannerViewModel = remember { DocumentScannerViewModel(context) }
     val pdfToImageViewModel = remember { PdfToImageViewModel(context) }
+    val ocrViewModel = remember { OcrViewModel(context) }
 
 
     val imageUIState by imageCompressorViewModel.uiState.collectAsStateWithLifecycle()
@@ -82,6 +87,9 @@ fun Navigation(
 
     val pdfToImgUIState by pdfToImageViewModel.uiState.collectAsStateWithLifecycle()
     val pdfToImgEvents : Flow<PdfToImgEvents> by lazy { pdfToImageViewModel.events }
+
+    val ocrUIState by ocrViewModel.uiState.collectAsStateWithLifecycle()
+    val ocrEvents : Flow<UIEvents> by lazy { ocrViewModel.events }
 
     //for doc scanner
     val launcher = rememberLauncherForActivityResult(
@@ -219,6 +227,21 @@ fun Navigation(
                             pdfToImageViewModel.onAction(action)
                         }
                     )
+                }
+                //ocr
+                composable<Screen.OCRScreen> {
+                    BackHandler {
+                        navController.navigateUp()
+                        ocrViewModel.onAction(OcrActions.Reset)
+                    }
+                    OCRPage(
+                        state = ocrUIState ,
+                        events = ocrEvents,
+                        onAction = {action->
+                            ocrViewModel.onAction(action)
+                        }
+
+                    ) 
                 }
             }
             //Show one time dialog

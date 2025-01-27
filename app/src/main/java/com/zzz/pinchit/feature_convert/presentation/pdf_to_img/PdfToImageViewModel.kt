@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -180,12 +181,16 @@ class PdfToImageViewModel(
 
 
     private fun resetStates() {
-        _uiState.update {
-            PdfToImgUIState()
+        viewModelScope.launch {
+            delay(300)
+            _uiState.update {
+                PdfToImgUIState()
+            }
+            pdfToImgState.update {
+                it.copy(images = emptyList())
+            }
         }
-        pdfToImgState.update {
-            it.copy(images = emptyList())
-        }
+
     }
 
 

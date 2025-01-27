@@ -198,10 +198,14 @@ class DocumentScannerViewModel(
     }
 
     private fun resetStates(){
-        docState.update { it.copy(pdfUri = null) }
-        _uiState.update {
-            DocScannerUIState()
+        viewModelScope.launch {
+            delay(300)
+            docState.update { it.copy(pdfUri = null) }
+            _uiState.update {
+                DocScannerUIState()
+            }
         }
+
     }
 
 
