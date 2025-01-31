@@ -3,8 +3,11 @@ package com.zzz.pinchit.feature_convert.presentation.img_to_pdf
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -20,7 +23,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.random.Random
 
 class DocumentScannerViewModel(
@@ -119,7 +124,7 @@ class DocumentScannerViewModel(
 
     //save file name
     private fun saveFileInfo() {
-        val date = SimpleDateFormat("yyyy").format(System.currentTimeMillis())
+        val date = SimpleDateFormat("yyyy", Locale.getDefault()).format(System.currentTimeMillis())
         val name = "$date${System.currentTimeMillis()}${Random.nextInt()}"
         Log.d("doc", "saveFileInfo: Doc name is $name ")
 
@@ -153,11 +158,11 @@ class DocumentScannerViewModel(
                 }
             Log.d("doc" , "Doc state ${docState.fileType} path ${docState.relativePath} ")
 
-            values.put(MediaStore.Files.FileColumns.MIME_TYPE , docState.fileType)
-            values.put(MediaStore.Files.FileColumns.DATE_ADDED , timeStamp)
-            values.put(MediaStore.Files.FileColumns.DISPLAY_NAME , fileName)
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+                values.put(MediaStore.Files.FileColumns.MIME_TYPE , docState.fileType)
+                values.put(MediaStore.Files.FileColumns.DATE_ADDED , timeStamp)
+                values.put(MediaStore.Files.FileColumns.DISPLAY_NAME , fileName)
 
                 values.put(MediaStore.Files.FileColumns.DATE_TAKEN , timeStamp)
                 values.put(MediaStore.Files.FileColumns.RELATIVE_PATH , docState.relativePath)
@@ -188,6 +193,23 @@ class DocumentScannerViewModel(
                 }
 
             }else{
+                val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+                val file = File(directory,"$fileName.pdf")
+                try {
+                    val fileUri = Uri.fromFile(file)
+                    context.contentResolver.openOutputStream(fileUri)
+                        ?.use {opStream->
+                            opStream.write(byteArray)
+                        }
+                    val mediaScannerIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                    mediaScannerIntent.data = fileUri
+                    context.sendBroadcast(mediaScannerIntent)
+                    _events.send(DocScannerEvents.Success)
+
+                }catch (e :Exception){
+                    e.printStackTrace()
+                    _events.send(DocScannerEvents.Error("Failed to save PDF!"))
+                }
 
             }
             _uiState.update {

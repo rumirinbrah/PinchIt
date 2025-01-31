@@ -3,6 +3,7 @@ package com.zzz.pinchit.feature_compress.presentation.image_comp
 import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -24,8 +25,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.random.Random
 
 class ImageCompressorViewModel(
@@ -77,6 +78,7 @@ class ImageCompressorViewModel(
         }
     }
 
+    //compress image
     private fun compressImage(
         contentUri: Uri ,
     ) {
@@ -146,7 +148,8 @@ class ImageCompressorViewModel(
     //save IMAGE INFO
     private fun saveFileInfo(uri: Uri) {
 
-        val name = SimpleDateFormat("yyyy").format(System.currentTimeMillis())
+        //dont make changes here mf
+        val name = SimpleDateFormat("yyyy", Locale.getDefault()).format(System.currentTimeMillis())
         val type = context.contentResolver.getType(uri)
         compressImageState.update {
             it.copy(
@@ -156,6 +159,7 @@ class ImageCompressorViewModel(
         }
     }
 
+    //save to gallery
     private fun saveCompressedImage() {
         _uiState.update {
             it.copy(loading = true)
@@ -166,15 +170,14 @@ class ImageCompressorViewModel(
         val timeStamp = System.currentTimeMillis()
         println("saving in progress")
         viewModelScope.launch(Dispatchers.IO) {
-            val values = ContentValues()
-            values.put(MediaStore.Images.Media.MIME_TYPE , imageState.fileType)
-            values.put(MediaStore.Images.Media.DATE_ADDED , timeStamp)
-            //!!!ADD THE FILE NAME
-            values.put(MediaStore.Images.Media.DISPLAY_NAME , imageState.fileName)
-
 
             // >android 10
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val values = ContentValues()
+                values.put(MediaStore.Images.Media.MIME_TYPE , imageState.fileType)
+                values.put(MediaStore.Images.Media.DATE_ADDED , timeStamp)
+                //!!!ADD THE FILE NAME
+                values.put(MediaStore.Images.Media.DISPLAY_NAME , imageState.fileName)
                 values.put(MediaStore.Images.Media.DATE_TAKEN , timeStamp)
                 values.put(MediaStore.Images.Media.RELATIVE_PATH , imageState.relativePath)
                 values.put(MediaStore.Images.Media.IS_PENDING , true)
@@ -189,53 +192,55 @@ class ImageCompressorViewModel(
                             .openOutputStream(fileUri)
                             ?.use { opStream ->
                                 opStream.write(_uiState.value.compressedImage)
-                                //bitmap.compress(Bitmap.CompressFormat.JPEG,50,opStream)
                             }
                         values.put(MediaStore.Images.Media.IS_PENDING , false)
                         context.contentResolver.update(fileUri , values , null , null)
 
                         //SUCCESS
-                        //resetStates()
                         _events.send(CompressImageEvents.OnSaveSuccess)
-                        //Toast.makeText(context , "Saved!" , Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Log.d(TAG , "saveBitmapToGallery: ${e.printStackTrace()}")
                         _events.send(CompressImageEvents.OnError)
                     }
                 }
+                //<Android 10
             } else {
-                Log.d("image", "Step1 In else block ")
+                Log.d("image", "Step1 Android ver<10 ")
 
-                val fileDir = "${Environment.DIRECTORY_PICTURES}/PinchIt"
-                val fileName = imageState.fileName
-                val imageFile = File(fileDir,fileName?:"unknown")
+                val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
 
-                Log.d("image", "Step2 File path is ${imageFile.absolutePath} ")
-                Log.d("image", "Step2 File name is ${imageFile.name} ")
-
-                values.put(MediaStore.Images.Media.RELATIVE_PATH , imageState.relativePath)
-
-                val uri = MediaStore.Images.Media.getContentUri("external")//context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values)
-                Log.d("image", "Step3 Inserting into content resolver")
-                uri?.let {fileUri->
-                    try {
-                        Log.d("image", "Step4 In try block attempting to open OutputStream ")
-                        context.contentResolver
-                            .openOutputStream(fileUri)
-                            ?.use {opStream->
-                                opStream.write(_uiState.value.compressedImage)
-                            }
-                        Log.d("image", "Step5 Updating content resolver ")
-                        context.contentResolver.update(fileUri,values,null,null)
-                        Log.d("image", "Step6 Putting data in media store ")
-                        values.put(MediaStore.Images.Media.DATA , imageFile.absolutePath)
-                        _events.send(CompressImageEvents.OnSaveSuccess)
-
-                    } catch (e: Exception) {
-                        Log.d(TAG , "saveBitmapToGallery: ${e.printStackTrace()}")
-                        _events.send(CompressImageEvents.OnError)
-                    }
+                val fileFolder = File(directory,"PinchIt")
+                if(!fileFolder.exists()){
+                    fileFolder.mkdirs()
                 }
+                Log.d("image", "Step2 File created ${fileFolder.path} ")
+                //fileName.png
+                val imageName = "${imageState.fileName}${imageState.fileExtension}"
+                val file = File(fileFolder,imageName)
+                //"${imageState.fileName!!}.jpg"
+
+                try {
+                    Log.d("image", "Step3 in try block ")
+                    Log.d("image", "Step4 Write to OP stream successful")
+                    val opUri = Uri.fromFile(file)
+                    context.contentResolver.openOutputStream(opUri)
+                        ?.use {opStream->
+                            opStream.write(_uiState.value.compressedImage)
+                        }
+                    val mediaScan = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                    mediaScan.data = opUri
+                    context.sendBroadcast(mediaScan)
+
+
+                    Log.d("image", "Step5 Media scan intent sent!! ")
+                    _events.send(CompressImageEvents.OnSaveSuccess)
+
+                }catch (e :Exception){
+                    Log.d("image", "Error In exception block ")
+                    e.printStackTrace()
+                    _events.send(CompressImageEvents.OnError)
+                }
+
 
             }
             _uiState.update {
@@ -243,10 +248,8 @@ class ImageCompressorViewModel(
             }
         }
     }
-/*
-val bitmap = BitmapFactory.decodeByteArray(_uiState.value.compressedImage,0,_uiState.value.compressedImage!!.size)
- MediaStore.Images.Media.insertImage(context.contentResolver,bitmap,fileName,"")
- */
+
+    //reset
     private fun resetStates() {
         viewModelScope.launch {
             delay(300)

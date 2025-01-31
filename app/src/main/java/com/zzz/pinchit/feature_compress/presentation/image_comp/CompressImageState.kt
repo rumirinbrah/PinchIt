@@ -5,6 +5,7 @@ import com.zzz.pinchit.feature_compress.presentation.util.CompressQuality
 data class CompressImageState(
     val fileName : String? = "unknown${System.currentTimeMillis()}",
     val fileType : String? = "image/png",
+    val fileExtension : String = ".jpg",
     val relativePath : String = "Pictures/PinchIt",
     val quality : CompressQuality = CompressQuality.MEDIUM
 )

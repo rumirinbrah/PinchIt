@@ -2,8 +2,6 @@ package com.zzz.pinchit.feature_ocr.presentation.crop
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -198,7 +196,7 @@ fun ImageCropper(
                     Size(width = topRight.x - topLeft.x , height = bottomLeft.y - topLeft.y)
 
                 drawRect(
-                    Color.DarkGray.copy(alpha = 0.5f) ,
+                    Color.DarkGray.copy(alpha=0.5f) ,
                     size = rectSize ,
                     topLeft = topLeft
                 )

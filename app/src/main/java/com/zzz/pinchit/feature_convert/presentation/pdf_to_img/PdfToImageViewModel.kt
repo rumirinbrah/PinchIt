@@ -144,6 +144,7 @@ class PdfToImageViewModel(
                         context.contentResolver
                             .openOutputStream(fileUri)
                             ?.use { opStream->
+                                //changes here
                                 bitmap.compress(Bitmap.CompressFormat.JPEG,100,opStream)
                             }
                         values.clear()
