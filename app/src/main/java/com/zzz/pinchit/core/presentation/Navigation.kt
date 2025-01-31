@@ -5,9 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
@@ -25,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,9 +52,7 @@ import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImgActions
 import com.zzz.pinchit.feature_convert.presentation.pdf_to_img.PdfToImgEvents
 import com.zzz.pinchit.feature_ocr.presentation.OCRPage
 import com.zzz.pinchit.feature_ocr.presentation.OcrActions
-import com.zzz.pinchit.feature_ocr.presentation.OcrUIState
 import com.zzz.pinchit.feature_ocr.presentation.OcrViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -72,7 +66,6 @@ fun Navigation(
 
 
     //view models
-//    val imageCompressorViewModel = remember{ ImageCompressorViewModel(context) }
     val pdfCompressorViewModel = remember { PDFCompressorViewModel(context) }
     val documentScannerViewModel = remember { DocumentScannerViewModel(context) }
     val pdfToImageViewModel = remember { PdfToImageViewModel(context) }
@@ -110,12 +103,8 @@ fun Navigation(
         requestExternalStoragePermission(context)
     }
 
-
-    /*
-
-
-     */
     Scaffold(
+        modifier = modifier,
         topBar = {
             Box(
                 modifier = Modifier

@@ -24,6 +24,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -75,7 +77,11 @@ fun ImageCropper(
                 contentDescription = "crop image" ,
                 modifier = Modifier
                     .aspectRatio(1f)
-                    .fillMaxWidth() ,
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        translationX = topRight.x-topLeft.x
+                        translationY = bottomLeft.y-topLeft.y
+                    },
                 contentScale = ContentScale.Fit
             )
             Canvas(
