@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
@@ -27,6 +28,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class PdfToImageViewModel(
@@ -87,11 +89,19 @@ class PdfToImageViewModel(
                                     async {
                                         openPage(index).use { page ->
 
+                                            //custom scaling for pages
+                                            val scaleFactor = 2.5f
+                                            val scaledWidth = (scaleFactor * page.width).toInt()
+                                            val scaledHeight = (scaleFactor * page.height).toInt()
+
                                             val bitmap = Bitmap.createBitmap(
-                                                page.width ,
-                                                page.height ,
+                                                scaledWidth ,
+                                                scaledHeight ,
                                                 Bitmap.Config.ARGB_8888
                                             )
+                                            val matrix = Matrix()
+                                            matrix.setScale(scaleFactor , scaleFactor)
+
                                             val canvas = Canvas(bitmap).apply {
                                                 drawColor(Color.WHITE)
                                                 drawBitmap(bitmap , 0f , 0f , null)
@@ -100,7 +110,7 @@ class PdfToImageViewModel(
                                             page.render(
                                                 bitmap ,
                                                 null ,
-                                                null ,
+                                                matrix ,
                                                 PdfRenderer.Page.RENDER_MODE_FOR_PRINT
                                             )
                                             bitmap
@@ -136,9 +146,10 @@ class PdfToImageViewModel(
         var saveSuccessful = true
         _uiState.update { it.copy(phase = PdfToImgPhase.SAVING) }
         viewModelScope.launch(Dispatchers.IO) {
-            val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-            val fileFolder = File(directory,"PinchIt")
-            if(!fileFolder.exists()){
+            val directory =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val fileFolder = File(directory , "PinchIt")
+            if (!fileFolder.exists()) {
                 fileFolder.mkdirs()
             }
             images.onEachIndexed { index , bitmap ->
@@ -147,19 +158,19 @@ class PdfToImageViewModel(
                 }
 
                 val name = getFileName()
-                val file = File(fileFolder,"$name.jpg")
+                val file = File(fileFolder , "$name.jpg")
 
                 try {
 
                     val fileUri = Uri.fromFile(file)
                     context.contentResolver.openOutputStream(fileUri)
-                        ?.use {opStream->
-                            bitmap.compress(Bitmap.CompressFormat.JPEG,100,opStream)
+                        ?.use { opStream ->
+                            bitmap.compress(Bitmap.CompressFormat.JPEG , 100 , opStream)
                         }
                     val mediaScannerIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
                     mediaScannerIntent.data = fileUri
                     context.sendBroadcast(mediaScannerIntent)
-                }catch (e : Exception){
+                } catch (e: Exception) {
                     _events.send(PdfToImgEvents.OnError("Failed to save images to gallery"))
                     saveSuccessful = false
                     e.printStackTrace()
@@ -246,7 +257,7 @@ class PdfToImageViewModel(
 
     private fun getFileName(): String {
         val timeStamp = System.currentTimeMillis()
-        val date = SimpleDateFormat("yyyy", Locale.getDefault()).format(timeStamp)
+        val date = SimpleDateFormat("yyyy" , Locale.getDefault()).format(timeStamp)
         val fileName = "$date$timeStamp${Random.nextInt()}"
         return fileName
     }
