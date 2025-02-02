@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class PdfToImageViewModel(
@@ -167,6 +166,7 @@ class PdfToImageViewModel(
                         ?.use { opStream ->
                             bitmap.compress(Bitmap.CompressFormat.JPEG , 100 , opStream)
                         }
+                    //notify about new media
                     val mediaScannerIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
                     mediaScannerIntent.data = fileUri
                     context.sendBroadcast(mediaScannerIntent)

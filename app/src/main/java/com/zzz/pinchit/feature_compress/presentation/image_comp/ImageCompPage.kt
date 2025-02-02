@@ -59,7 +59,7 @@ fun ImageCompPage(
                 //Toast.makeText(context , "Saved to gallery!!" , Toast.LENGTH_SHORT).show()
                 scope.launch {
                     snackbarState.showSnackbar(
-                        message = "Images saved to gallery!",
+                        message = "Image saved to gallery!",
                         actionLabel = "S",
                         withDismissAction = true,
                         duration = SnackbarDuration.Short
