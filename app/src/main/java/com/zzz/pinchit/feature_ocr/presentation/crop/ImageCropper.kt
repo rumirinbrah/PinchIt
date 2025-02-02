@@ -77,11 +77,7 @@ fun ImageCropper(
                 contentDescription = "crop image" ,
                 modifier = Modifier
                     .aspectRatio(1f)
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        translationX = topRight.x-topLeft.x
-                        translationY = bottomLeft.y-topLeft.y
-                    },
+                    .fillMaxWidth(),
                 contentScale = ContentScale.Fit
             )
             Canvas(

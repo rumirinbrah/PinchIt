@@ -29,5 +29,12 @@ val imgToPdfTint = Color(0xFF4FEA55)
 val pdfToImgTint = Color(0xFF75C1FF)
 val ocrTint = Color(0xFFCBBB2F)
 
+//snackbar
+val snackbarGreen = Color(0xFF45A148)
+val snackbarRed = Color(0xFFD24E4E)
+val snackWipeGreen = Color(0xFF2D692F)
+val snackWipeRed = Color(0xFF9A3838)
+
+
 
 

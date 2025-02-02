@@ -1,10 +1,10 @@
 package com.zzz.pinchit.feature_compress.presentation.image_comp
 
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,18 +14,26 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.request.ImageRequest
+import com.zzz.pinchit.core.presentation.components.CustomSnackbar
 import com.zzz.pinchit.core.presentation.util.ObserveAsEvents
 import com.zzz.pinchit.feature_compress.presentation.image_comp.components.ImageQualityOptions
 import com.zzz.pinchit.feature_compress.presentation.image_comp.components.PreviewImageWithTitle
 import com.zzz.pinchit.feature_compress.presentation.util.VerticalSpace
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
@@ -35,6 +43,8 @@ fun ImageCompPage(
     onAction: (CompImageAction) -> Unit ,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarState = remember { SnackbarHostState() }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -46,128 +56,158 @@ fun ImageCompPage(
     ObserveAsEvents(events = events) { event->
         when(event){
             CompressImageEvents.OnSaveSuccess->{
-                Toast.makeText(context , "Saved to gallery!!" , Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context , "Saved to gallery!!" , Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    snackbarState.showSnackbar(
+                        message = "Images saved to gallery!",
+                        actionLabel = "S",
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Short
+                    )
+                }
             }
             CompressImageEvents.OnError->{
-                Toast.makeText(context , "Failed to save" , Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context , "Failed to save" , Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    snackbarState.showSnackbar(
+                        message = "Failed to save",
+                        actionLabel = "E",
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Short
+                    )
+                }
             }
         }
     }
 
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        VerticalSpace()
-        when (state.phase) {
+    Box(
+
+    ){
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            VerticalSpace()
+            when (state.phase) {
 
 
-            CompressPhase.IMAGE_NOT_SELECTED -> {
-                Button(
-                    onClick = {
-                        launcher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    }
-                ) {
-                    Text(
-                        "Pick Image" ,
-                        color = MaterialTheme.colorScheme.onBackground ,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                VerticalSpace()
-                Text(
-                    "(Note that PNGs will not be compressed)" ,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            CompressPhase.IMAGE_SELECTED -> {
-
-                PreviewImageWithTitle(
-                    model = ImageRequest.Builder(context)
-                        .data(state.currentImage)
-                        .crossfade(true)
-                        .build() ,
-                    title = "Selected Image"
-                )
-                VerticalSpace()
-                ImageQualityOptions(
-                    currentQuality = state.currentQuality ,
-                    onQualityChange = {
-                        onAction(CompImageAction.OnQualityChange(it))
-                    }
-                )
-                VerticalSpace()
-                Button(
-                    enabled = !state.loading ,
-                    onClick = {
-                        onAction(CompImageAction.OnCompress)
-                    }
-                ) {
-                    Text(
-                        "Compress Image" ,
-                        color = MaterialTheme.colorScheme.onBackground ,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-            }
-
-            CompressPhase.IMAGE_COMPRESSED -> {
-                PreviewImageWithTitle(
-                    model = ImageRequest.Builder(context)
-                        .data(state.compressedImage)
-                        .crossfade(true)
-                        .build() ,
-                    title = "Compressed Image"
-                )
-                val size = getFormattedImageSize(state.compressedImage?.size)
-                Text("Size $size", style = MaterialTheme.typography.bodySmall)
-                VerticalSpace()
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
+                CompressPhase.IMAGE_NOT_SELECTED -> {
                     Button(
-                        enabled = !state.loading ,
                         onClick = {
-                            onAction(CompImageAction.OnCancel)
-                        } ,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(
-                            "Cancel" ,
-                            color = MaterialTheme.colorScheme.onBackground ,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    Button(
-                        enabled = !state.loading ,
-                        onClick = {
-                            onAction(CompImageAction.OnSave)
+                            launcher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
                         }
                     ) {
                         Text(
-                            "Save Image" ,
+                            "Pick Image" ,
                             color = MaterialTheme.colorScheme.onBackground ,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
+                    VerticalSpace()
+                    Text(
+                        "(Note that PNGs will not be compressed)" ,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                CompressPhase.IMAGE_SELECTED -> {
+
+                    PreviewImageWithTitle(
+                        model = ImageRequest.Builder(context)
+                            .data(state.currentImage)
+                            .crossfade(true)
+                            .build() ,
+                        title = "Selected Image"
+                    )
+                    VerticalSpace()
+                    ImageQualityOptions(
+                        currentQuality = state.currentQuality ,
+                        onQualityChange = {
+                            onAction(CompImageAction.OnQualityChange(it))
+                        }
+                    )
+                    VerticalSpace()
+                    Button(
+                        enabled = !state.loading ,
+                        onClick = {
+                            onAction(CompImageAction.OnCompress)
+                        }
+                    ) {
+                        Text(
+                            "Compress Image" ,
+                            color = MaterialTheme.colorScheme.onBackground ,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                }
+
+                CompressPhase.IMAGE_COMPRESSED -> {
+                    PreviewImageWithTitle(
+                        model = ImageRequest.Builder(context)
+                            .data(state.compressedImage)
+                            .crossfade(true)
+                            .build() ,
+                        title = "Compressed Image"
+                    )
+                    val size = getFormattedImageSize(state.compressedImage?.size)
+                    Text("Size $size", style = MaterialTheme.typography.bodySmall)
+                    VerticalSpace()
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Button(
+                            enabled = !state.loading ,
+                            onClick = {
+                                onAction(CompImageAction.OnCancel)
+                            } ,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text(
+                                "Cancel" ,
+                                color = MaterialTheme.colorScheme.onBackground ,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Button(
+                            enabled = !state.loading ,
+                            onClick = {
+                                onAction(CompImageAction.OnSave)
+                            }
+                        ) {
+                            Text(
+                                "Save Image" ,
+                                color = MaterialTheme.colorScheme.onBackground ,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                    VerticalSpace(20.dp)
+                    Text(
+                        "( Images will appear in your device gallery once saved )" ,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
-
-
+        SnackbarHost(
+            hostState = snackbarState,
+            modifier= Modifier.align(Alignment.BottomCenter),
+            snackbar = { CustomSnackbar(it) }
+        )
     }
 
 }
+
 private fun getFormattedImageSize(bytes : Int?):String{
     if(bytes==null){
         return "Unknown"
