@@ -10,7 +10,8 @@ Clone the project if you've always wondered how to compress files using Kotlin b
 * Makes use of Google document scanner to scan Images and convert them to PDFs
 ## Convert PDF back to images 
 * Makes use to native libraries to render the PDF
-* Once rendered, saves the images to device using Media Store
+* Uses custom scaling factor for rendering
+* Once rendered, saves the images to device gallery
 ## Image to text
 * Makes use of firebase ml kit for ocr
 * Crop image, copy to clipboard
