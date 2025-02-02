@@ -68,15 +68,19 @@ fun Navigation(
     val ocrViewModel = remember { OcrViewModel(context) }
 
 
+    //compress img
     val imageUIState by imageCompressorViewModel.uiState.collectAsStateWithLifecycle()
     val imageEvents : Flow<CompressImageEvents> by lazy { imageCompressorViewModel.events }
 
+    //doc scanner
     val docScannerUIState by documentScannerViewModel.uiState.collectAsStateWithLifecycle()
     val docEvents : Flow<DocScannerEvents> by lazy { documentScannerViewModel.events }
 
+    //pdf to img
     val pdfToImgUIState by pdfToImageViewModel.uiState.collectAsStateWithLifecycle()
     val pdfToImgEvents : Flow<PdfToImgEvents> by lazy { pdfToImageViewModel.events }
 
+    //ocr
     val ocrUIState by ocrViewModel.uiState.collectAsStateWithLifecycle()
     val ocrEvents : Flow<UIEvents> by lazy { ocrViewModel.events }
 
@@ -92,7 +96,6 @@ fun Navigation(
         }
     }
 
-    println("Permission ${hasExternalStoragePermission(context)}")
     if(!hasExternalStoragePermission(context)){
         requestExternalStoragePermission(context)
     }
